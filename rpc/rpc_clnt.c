@@ -9,15 +9,30 @@
 /* Default timeout can be changed using clnt_control() */
 static struct timeval TIMEOUT = { 25, 0 };
 
-proy_out *
-proyproc_1(proy_in *argp, CLIENT *clnt)
+rta *
+login_1(proy_in *argp, CLIENT *clnt)
 {
-	static proy_out clnt_res;
+	static rta clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, PROYPROC,
+	if (clnt_call (clnt, login,
 		(xdrproc_t) xdr_proy_in, (caddr_t) argp,
-		(xdrproc_t) xdr_proy_out, (caddr_t) &clnt_res,
+		(xdrproc_t) xdr_rta, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+rta *
+logout_1(proy_in2 *argp, CLIENT *clnt)
+{
+	static rta clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, logout,
+		(xdrproc_t) xdr_proy_in2, (caddr_t) argp,
+		(xdrproc_t) xdr_rta, (caddr_t) &clnt_res,
 		TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}

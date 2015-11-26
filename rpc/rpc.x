@@ -1,24 +1,24 @@
 struct proy_in
 {
-	/*input arg*/
-	char* usuario;
-	char* pass;
+	char usuario[256];
+	char pass[256];
 };
 struct proy_in2
 {
 	/*input arg*/
-	char* usuario;
+	char usuario[256];
 	int token;
 };
-struct proy_out
+struct rta
 {
-	/*op result*/
-	int token;
+	int rta;
 };
 program PROY_PROG
 {
 	version PROY_VERS
 	{
-		proy_out PROYPROC(proy_in)=1; /*proc no=1*/
-	}=1; /*version no*/
-}=0x31540000;/*prog no*/
+		rta login(proy_in)=1; 
+		rta logout(proy_in2)=2;
+
+	}=1; 
+}=0x31540000;

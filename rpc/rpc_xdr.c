@@ -10,9 +10,12 @@ xdr_proy_in (XDR *xdrs, proy_in *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_pointer (xdrs, (char **)&objp->usuario, sizeof (char), (xdrproc_t) xdr_char))
+	int i;
+	 if (!xdr_vector (xdrs, (char *)objp->usuario, 256,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
-	 if (!xdr_pointer (xdrs, (char **)&objp->pass, sizeof (char), (xdrproc_t) xdr_char))
+	 if (!xdr_vector (xdrs, (char *)objp->pass, 256,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
 	return TRUE;
 }
@@ -22,7 +25,9 @@ xdr_proy_in2 (XDR *xdrs, proy_in2 *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_pointer (xdrs, (char **)&objp->usuario, sizeof (char), (xdrproc_t) xdr_char))
+	int i;
+	 if (!xdr_vector (xdrs, (char *)objp->usuario, 256,
+		sizeof (char), (xdrproc_t) xdr_char))
 		 return FALSE;
 	 if (!xdr_int (xdrs, &objp->token))
 		 return FALSE;
@@ -30,11 +35,11 @@ xdr_proy_in2 (XDR *xdrs, proy_in2 *objp)
 }
 
 bool_t
-xdr_proy_out (XDR *xdrs, proy_out *objp)
+xdr_rta (XDR *xdrs, rta *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_int (xdrs, &objp->token))
+	 if (!xdr_int (xdrs, &objp->rta))
 		 return FALSE;
 	return TRUE;
 }

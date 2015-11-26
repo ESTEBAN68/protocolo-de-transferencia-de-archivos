@@ -20,7 +20,8 @@ static void
 proy_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
-		proy_in proyproc_1_arg;
+		proy_in login_1_arg;
+		proy_in2 logout_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -31,10 +32,16 @@ proy_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		(void) svc_sendreply (transp, (xdrproc_t) xdr_void, (char *)NULL);
 		return;
 
-	case PROYPROC:
+	case login:
 		_xdr_argument = (xdrproc_t) xdr_proy_in;
-		_xdr_result = (xdrproc_t) xdr_proy_out;
-		local = (char *(*)(char *, struct svc_req *)) proyproc_1_svc;
+		_xdr_result = (xdrproc_t) xdr_rta;
+		local = (char *(*)(char *, struct svc_req *)) login_1_svc;
+		break;
+
+	case logout:
+		_xdr_argument = (xdrproc_t) xdr_proy_in2;
+		_xdr_result = (xdrproc_t) xdr_rta;
+		local = (char *(*)(char *, struct svc_req *)) logout_1_svc;
 		break;
 
 	default:

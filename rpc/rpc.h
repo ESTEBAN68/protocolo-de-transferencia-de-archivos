@@ -15,35 +15,41 @@ extern "C" {
 
 
 struct proy_in {
-	char *usuario;
-	char *pass;
+	char usuario[256];
+	char pass[256];
 };
 typedef struct proy_in proy_in;
 
 struct proy_in2 {
-	char *usuario;
+	char usuario[256];
 	int token;
 };
 typedef struct proy_in2 proy_in2;
 
-struct proy_out {
-	int token;
+struct rta {
+	int rta;
 };
-typedef struct proy_out proy_out;
+typedef struct rta rta;
 
 #define PROY_PROG 0x31540000
 #define PROY_VERS 1
 
 #if defined(__STDC__) || defined(__cplusplus)
-#define PROYPROC 1
-extern  proy_out * proyproc_1(proy_in *, CLIENT *);
-extern  proy_out * proyproc_1_svc(proy_in *, struct svc_req *);
+#define login 1
+extern  rta * login_1(proy_in *, CLIENT *);
+extern  rta * login_1_svc(proy_in *, struct svc_req *);
+#define logout 2
+extern  rta * logout_1(proy_in2 *, CLIENT *);
+extern  rta * logout_1_svc(proy_in2 *, struct svc_req *);
 extern int proy_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
-#define PROYPROC 1
-extern  proy_out * proyproc_1();
-extern  proy_out * proyproc_1_svc();
+#define login 1
+extern  rta * login_1();
+extern  rta * login_1_svc();
+#define logout 2
+extern  rta * logout_1();
+extern  rta * logout_1_svc();
 extern int proy_prog_1_freeresult ();
 #endif /* K&R C */
 
@@ -52,12 +58,12 @@ extern int proy_prog_1_freeresult ();
 #if defined(__STDC__) || defined(__cplusplus)
 extern  bool_t xdr_proy_in (XDR *, proy_in*);
 extern  bool_t xdr_proy_in2 (XDR *, proy_in2*);
-extern  bool_t xdr_proy_out (XDR *, proy_out*);
+extern  bool_t xdr_rta (XDR *, rta*);
 
 #else /* K&R C */
 extern bool_t xdr_proy_in ();
 extern bool_t xdr_proy_in2 ();
-extern bool_t xdr_proy_out ();
+extern bool_t xdr_rta ();
 
 #endif /* K&R C */
 
