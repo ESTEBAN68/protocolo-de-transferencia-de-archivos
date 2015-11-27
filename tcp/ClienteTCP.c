@@ -6,6 +6,7 @@
 
 #define SIZE 256
 #define MAXLINE 4096
+#define PORT 2222
 
 void str_echo(FILE *fp,int sock);
 
@@ -16,9 +17,9 @@ int main (int argc,char *argv[])
 	struct sockaddr_in adr;
 	struct hostent *hp, *gethostbyname();
 
-	if (argc != 3)
+	if (argc != 2)
 	{
-		fprintf(stderr, "Uso: %s<host> <port>\n",argv[0] );
+		fprintf(stderr, "Uso: %s<host> \n",argv[0] );
 		exit(1);
 	}
 
@@ -36,7 +37,7 @@ int main (int argc,char *argv[])
 
 	adr.sin_family = PF_INET;
 	adr.sin_addr.s_addr = htonl(INADDR_ANY);
-	adr.sin_port = htons (atoi(argv[2]));
+	adr.sin_port = htons (PORT);
 	bcopy(hp->h_addr,&adr.sin_addr,hp->h_length);
 
 	if (connect(sock,&adr,sizeof(adr))==-1)
@@ -56,14 +57,39 @@ void str_echo(FILE *fp, int sock)
 
 	while (fgets(sendline,MAXLINE,fp) != NULL)
 	{
+
 		write(sock,sendline,strlen(sendline));
-		if(read (sock,recvline,MAXLINE) == 0)
+		
+		n=read(sock,recvline,MAXLINE);
+
+		if(n==0)
 		{
-			fprintf(stderr, "Servidor terminado prematuramente\n");
+			printf("servidor desconectado\n");
 			exit(5);
 		}
-		fputs(recvline,stdout);
-		memset(sendline,0,MAXLINE);
+		else{
+			printf("%i\n", n);
+			FILE *f2;
+			f2=fopen("dedesclient.txt","w");
+		while(n>=MAXLINE)
+		{
+			fwrite(recvline,1,strlen(recvline),f2);
+			memset(recvline,0,strlen(recvline));
+			
+			n=read(sock,recvline,MAXLINE);
+
+		}
+		fwrite(recvline,1,strlen(recvline),f2);
+
 		memset(recvline,0,MAXLINE);
+		fclose(f2);
+
+	}
+
+
+		printf("recvline asi ? \n" );
+		
+		memset(sendline,0,MAXLINE);
+		break;
 	}
 }

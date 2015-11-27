@@ -63,12 +63,11 @@ int main (int argc, char *argv[])
 	int lgadr =sizeof(adr);
 	int port =PORT;
 
-	if (argc != 2)
+	if (argc != 1)
 	{
 		fprintf(stderr, "Uso: %s[port] \n",argv[0] );
 		exit(1);
 	}
-	port = atoi(argv[1]);
 
 	if ((sock_escucha = crearsocket(&port,SOCK_STREAM)) == -1)
 	{
@@ -105,14 +104,36 @@ servicio (int sock)
 {
 	ssize_t n;
 	char line[MAXLINE];
+	char *lectura[1000];
+	int leido;
+	FILE *f1;
+	FILE *f2;
 
+
+	f1=fopen("hola.txt","r");
+	f2=fopen("segundo.txt","w");
+	
 	for(;;)
 	{
 		if((n = read (sock, line , MAXLINE))<=0)
 		{
 			return;
 		}
-		write(sock,&line,n);
-		memset(line,0,MAXLINE);
+		leido=fread (lectura,1,1000,f1);
+		while(leido==1000)
+		{
+			
+			write(sock,&lectura,leido);
+			fwrite(lectura,1,leido,f2);
+			leido=fread(lectura,1,1000,f1);
+			printf(" leido es %i",leido);
+		}
+		fwrite(lectura,1,leido,f2);
+		printf(" leido es %i",leido);
+		write(sock,&lectura,leido);
+
 	}
+
+	fclose(f1);
+	fclose(f2);
 }
