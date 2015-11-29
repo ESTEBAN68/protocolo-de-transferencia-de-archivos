@@ -8,12 +8,243 @@
  * as a guideline for developing your own functions.
  */
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include "errno.h"
 #include "rpc/rpc.h"
+#include "string.h"
 #include "rpc.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
+#include "assert.h"
+
+#define SIZE 256
+#define MAXLINE 4096
+#define PORT 2222
+
+char rserv[256];
+int inicio();
+void imprimir(char * comando);
+void imprimirayuda();
+void traer(char* ruta);
+void str_echo(FILE *fp,int sock);
+char ** str_split(char * a_str,const char a_delim)
+{
+	char ** result =0;
+	size_t count =0;
+	char * last_comma =0;
+	char *tmp =a_str;
+	char delim[2];
+	delim[0]=a_delim;
+	delim[1]=0;
+	while(*tmp)
+	{
+		if(a_delim==*tmp)
+		{
+			count++;
+			last_comma = tmp;
+		}
+		tmp++;
+	}
+	count += last_comma<(a_str + strlen(a_str)-1);
+	count ++;
+	result=malloc(sizeof(char*)* count);
+	if(result)
+	{
+		size_t idx = 0;
+		char* token = strtok(a_str,delim);
+		while(token)
+		{
+			assert(idx < count);
+			*(result + idx++) = strdup(token);
+			token = strtok(0,delim);
+		}
+		assert(idx==count-1);
+		*(result + idx)=0;
+	}
+	return result;
+}
+
+ int inicio()
+ {
+ 		char salida[256];
+		printf(">>");
+		scanf("%s",salida);
+		int c=0;
+		char **tokens;
+		if(salida[0]!='<'){
+			if(strstr(salida,"<")!=NULL){
+				c=1;
+				tokens= str_split(salida,'<');
+				printf("%i \n",c );
+			}
+		}
+
+
+		if(strcmp(salida,"salir")==0)
+		{
+			memset(salida,0,256);
+			return 1;
+		} 
+		else if (strcmp(salida,"--help")==0)
+		{
+			memset(salida,0,256);
+			imprimirayuda();	
+			return 0;
+		}
+		else if ((c==1))
+		{
+			if((strcmp(tokens[0],"info")==0)){
+			char **tokens2;
+			if(strstr(tokens[1],">")!=NULL)
+			{
+				if(tokens[1][0]!='>'){
+					tokens2= str_split(tokens[1],'>');
+					printf("%s\n", tokens2[0]);
+				}
+				else
+				{
+					imprimir(salida);
+				}
+			}
+			else
+			{
+				imprimir(salida);
+			}
+			memset(salida,0,256);
+			return 0;
+			}
+			else if((strcmp(tokens[0],"traer")==0)){
+			char **tokens2;
+			if(strstr(tokens[1],">")!=NULL)
+			{
+				if(tokens[1][0]!='>'){
+					tokens2= str_split(tokens[1],'>');
+					traer(tokens2[0]);
+					printf("%s\n", tokens2[0]);
+				}
+				else
+				{
+					imprimir(salida);
+				}
+			}
+			else
+			{
+				imprimir(salida);
+			}
+			memset(salida,0,256);
+			return 0;
+			}
+			else 
+			{
+				imprimir(salida);
+				return 0;
+			}
+		}
+		
+		else
+		{
+
+			imprimir(salida);
+			memset(salida,0,256);
+			return 0;
+		}	
+ }
+ void traer(char* traer)
+ {
+
+ 	int sock;
+	char com[SIZE];
+	struct sockaddr_in adr;
+	struct hostent *hp, *gethostbyname();
+
+	
+
+	if ((sock = socket (PF_INET,SOCK_STREAM,0)) == -1)
+	{
+		perror("imposible crecion del socket ");
+		exit(2);
+	}
+
+	if ((hp = gethostbyname(rserv))==NULL)
+	{
+		perror("Error: nombre de la maquina desconocido.");
+		exit(3);
+	}
+
+	adr.sin_family = PF_INET;
+	adr.sin_addr.s_addr = htonl(INADDR_ANY);
+	adr.sin_port = htons (PORT);
+	bcopy(hp->h_addr,&adr.sin_addr,hp->h_length);
+
+	if (connect(sock,&adr,sizeof(adr))==-1)
+	{
+		perror("connect");
+		exit(4);
+	}
+
+	str_echo (stdin, sock);
+ }
+ void str_echo(FILE *fp, int sock)
+{
+	char sendline[MAXLINE], recvline[MAXLINE];
+	int n;
+
+	while (fgets(sendline,MAXLINE,fp) != NULL)
+	{
+
+		write(sock,sendline,strlen(sendline));
+		
+		n=read(sock,recvline,MAXLINE);
+
+		if(n==0)
+		{
+			printf("servidor desconectado\n");
+			exit(5);
+		}
+		else{
+			printf("%i\n", n);
+			FILE *f2;
+			f2=fopen("dedesclient.txt","w");
+		while(n>=MAXLINE)
+		{
+			fwrite(recvline,1,strlen(recvline),f2);
+			memset(recvline,0,strlen(recvline));
+			
+			n=read(sock,recvline,MAXLINE);
+
+		}
+		fwrite(recvline,1,strlen(recvline),f2);
+
+		memset(recvline,0,MAXLINE);
+		fclose(f2);
+
+	}
+
+
+		printf("recvline asi ? \n" );
+		
+		memset(sendline,0,MAXLINE);
+		break;
+	}
+}
+ void imprimir(char* comando)
+ {
+ 	printf("El comando < %s >  no se reconoce intente --help \n",comando);
+ }
+ void imprimirayuda()
+ {
+ 	printf("Comandos validos\n");
+ 	printf("listar                -observa en una lista los archivos alojados en el servidor\n");
+ 	printf("info<nombre_archivo>       -Obtener detalles del archivo especificado   \n");
+ 	printf("traer<nombre_archivo>      -Obtener una copia del archivo especificado  \n");
+ 	printf("salir                      -salir\n");
+
+ }
+
 int main (int argc, char **argv)
 {
 	CLIENT *cl;
@@ -30,7 +261,9 @@ int main (int argc, char **argv)
   		printf("\n argumentos insuficientes");
   		exit(-1);
   	}
-  	cl=clnt_create(argv[1],PROY_PROG,PROY_VERS,"tcp");
+  	strcpy(rserv,argv[1]);
+  	cl=clnt_create(rserv,PROY_PROG,PROY_VERS,"tcp");
+  	printf("si \n");
   	if(cl==NULL)
   	{
   		printf("\n error %s",strerror(errno));
@@ -60,12 +293,11 @@ int main (int argc, char **argv)
 		printf("bienvenido amigo \n");
 	}
 		printf("el token es %d\n",tok->rta);
-		char salida[2];
+		int opc=0;
+		while(opc==0){
+			opc=inicio();
+		}
 
-		printf("desea salir y \n");
-		scanf("%s",salida); 
-		
-		printf("%s \n",in.usuario);
 		strcpy(in2.usuario,in.usuario);
 		in2.token=tok->rta;
 
@@ -74,8 +306,7 @@ int main (int argc, char **argv)
 			printf("\nerror :%s",clnt_sperror(cl,argv[1]));
 			exit(-1);
 		}
-		printf("%d\n", tok2->rta);
-		printf("bien ... \n");
+		printf("hasta pronto ... \n");
 
 
 

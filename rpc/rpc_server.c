@@ -13,7 +13,7 @@ char ** str_split(char * a_str,const char a_delim)
 	char ** result =0;
 	size_t count =0;
 	char * last_comma =0;
-	* tmp =a_str;
+	char *tmp =a_str;
 	char delim[2];
 	delim[0]=a_delim;
 	delim[1]=0;
