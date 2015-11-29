@@ -30,7 +30,7 @@ int inicio();
 void imprimir(char * comando);
 void imprimirayuda();
 void traer(char* ruta);
-void str_echo(FILE *fp,int sock);
+void str_echo(FILE *fp,int sock,char *traer);
 char ** str_split(char * a_str,const char a_delim)
 {
 	char ** result =0;
@@ -186,16 +186,16 @@ char ** str_split(char * a_str,const char a_delim)
 		exit(4);
 	}
 
-	str_echo (stdin, sock);
+	str_echo (stdin, sock,traer);
  }
- void str_echo(FILE *fp, int sock)
+ void str_echo(FILE *fp, int sock,char *traer)
 {
 	char sendline[MAXLINE], recvline[MAXLINE];
 	int n;
 
 	while (fgets(sendline,MAXLINE,fp) != NULL)
 	{
-
+		strcpy(sendline,traer);
 		write(sock,sendline,strlen(sendline));
 		
 		n=read(sock,recvline,MAXLINE);
@@ -215,8 +215,10 @@ char ** str_split(char * a_str,const char a_delim)
 			memset(recvline,0,strlen(recvline));
 			
 			n=read(sock,recvline,MAXLINE);
+			printf("%s \n",recvline);
 
 		}
+
 		fwrite(recvline,1,strlen(recvline),f2);
 
 		memset(recvline,0,MAXLINE);
@@ -228,6 +230,7 @@ char ** str_split(char * a_str,const char a_delim)
 		printf("recvline asi ? \n" );
 		
 		memset(sendline,0,MAXLINE);
+		close(sock);
 		break;
 	}
 }

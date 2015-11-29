@@ -110,15 +110,16 @@ servicio (int sock)
 	FILE *f2;
 
 
-	f1=fopen("hola.txt","r");
+	f1=fopen("holase.txt","r");
 	f2=fopen("segundo.txt","w");
-	
+	if(f1!=NULL){
 	for(;;)
 	{
 		if((n = read (sock, line , MAXLINE))<=0)
 		{
 			return;
 		}
+		printf("%s",line);
 		leido=fread (lectura,1,1000,f1);
 		while(leido==1000)
 		{
@@ -126,14 +127,17 @@ servicio (int sock)
 			write(sock,&lectura,leido);
 			fwrite(lectura,1,leido,f2);
 			leido=fread(lectura,1,1000,f1);
-			printf(" leido es %i",leido);
 		}
 		fwrite(lectura,1,leido,f2);
-		printf(" leido es %i",leido);
 		write(sock,&lectura,leido);
 
 	}
-
+}
+else{
+	char* leer="no existe nada";
+	leido=10;
+	write(sock,&leer,leido);
+}
 	fclose(f1);
 	fclose(f2);
 }
