@@ -79,7 +79,6 @@ char ** str_split(char * a_str,const char a_delim)
 			if(strstr(salida,"<")!=NULL){
 				c=1;
 				tokens= str_split(salida,'<');
-				printf("%i \n",c );
 			}
 		}
 
@@ -103,7 +102,6 @@ char ** str_split(char * a_str,const char a_delim)
 			{
 				if(tokens[1][0]!='>'){
 					tokens2= str_split(tokens[1],'>');
-					printf("%s\n", tokens2[0]);
 				}
 				else
 				{
@@ -124,7 +122,6 @@ char ** str_split(char * a_str,const char a_delim)
 				if(tokens[1][0]!='>'){
 					tokens2= str_split(tokens[1],'>');
 					traer(tokens2[0]);
-					printf("%s\n", tokens2[0]);
 				}
 				else
 				{
@@ -205,29 +202,29 @@ char ** str_split(char * a_str,const char a_delim)
 			printf("servidor desconectado\n");
 			exit(5);
 		}
+		else if(strcmp(recvline,"no")==0)
+		{
+			printf("Este archivo no existe \n");
+		}
 		else{
-			printf("%i\n", n);
 			FILE *f2;
-			f2=fopen("dedesclient.txt","w");
+			f2=fopen(traer,"w");
 		while(n>=MAXLINE)
 		{
 			fwrite(recvline,1,strlen(recvline),f2);
 			memset(recvline,0,strlen(recvline));
 			
 			n=read(sock,recvline,MAXLINE);
-			printf("%s \n",recvline);
 
 		}
-
 		fwrite(recvline,1,strlen(recvline),f2);
 
 		memset(recvline,0,MAXLINE);
 		fclose(f2);
+		printf("completado ..\n");
 
 	}
 
-
-		printf("recvline asi ? \n" );
 		
 		memset(sendline,0,MAXLINE);
 		close(sock);
