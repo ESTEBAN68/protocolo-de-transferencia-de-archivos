@@ -84,7 +84,7 @@ rta * login_1_svc(proy_in *in, struct svc_req *rqstp)
 		char buffer[sizeof(result.rta)];
 		snprintf(buffer,sizeof(buffer),"%d",result.rta);
 		FILE *fp;
-		fp=fopen(in->usuario,"a+t");
+		fp=fopen(in->usuario,"w");
 		fputs(buffer,fp);
 		fclose(fp);
 	}

@@ -12,6 +12,8 @@
 #define PORT 2222
 #define MAXLINE 4096
 #define TRUE 1
+char usuario[256];
+char token[256];
 
 int crearsocket(int * port, int type)
 {
@@ -110,6 +112,35 @@ servicio (int sock)
 	FILE *f2;
 
 	if((n = read (sock, line , MAXLINE))<=0)
+		{
+			return;
+		}
+	strcpy(usuario,line);
+	char leeido[100];
+	FILE *f3;
+	f3=fopen(usuario,"r");
+	if(f3!=NULL){strcpy(leeido,"leido");}
+	else{strcpy(leeido,"no leido");}
+	write(sock,&leeido,MAXLINE);
+	
+	if((n = read (sock, line , MAXLINE))<=0)
+		{
+			return;
+		}
+	strcpy(token,line);
+	leido=fread(lectura,1,1000,f3);
+	if(strcmp(lectura,token)==0){
+		strcpy(leeido,"leido");
+	}
+	else
+	{
+		strcpy(leeido,"no leido");
+	}
+
+		close(f3);
+
+	write(sock,&leeido,MAXLINE);
+		if((n = read (sock, line , MAXLINE))<=0)
 		{
 			return;
 		}

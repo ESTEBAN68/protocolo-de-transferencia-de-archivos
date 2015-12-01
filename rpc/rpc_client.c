@@ -25,12 +25,14 @@
 #define MAXLINE 4096
 #define PORT 2222
 
-char rserv[256];
-int inicio();
-void imprimir(char * comando);
-void imprimirayuda();
-void traer(char* ruta);
-void str_echo(FILE *fp,int sock,char *traer);
+char 	usuario [256];
+int 	clave;
+char 	rserv[256];
+int 	inicio();
+void 	imprimir(char * comando);
+void 	imprimirayuda();
+void 	traer(char* ruta);
+void 	str_echo(FILE *fp,int sock,char *traer);
 char ** str_split(char * a_str,const char a_delim)
 {
 	char ** result =0;
@@ -157,7 +159,6 @@ char ** str_split(char * a_str,const char a_delim)
 	char com[SIZE];
 	struct sockaddr_in adr;
 	struct hostent *hp, *gethostbyname();
-
 	
 
 	if ((sock = socket (PF_INET,SOCK_STREAM,0)) == -1)
@@ -193,10 +194,32 @@ char ** str_split(char * a_str,const char a_delim)
 	while (fgets(sendline,MAXLINE,fp) != NULL)
 	{
 		strcpy(sendline,traer);
-		write(sock,sendline,strlen(sendline));
-		
+		write(sock,usuario,strlen(usuario));
 		n=read(sock,recvline,MAXLINE);
-
+		if(strcmp(recvline,"leido")==0)
+		{
+			printf("ACCEDIENDO AL SERVIDOR .... \n");
+		}
+		else
+		{
+			printf("error de autentificacion ...\n");
+			exit(-1);
+		}
+		char pass[256];
+		sprintf(pass,"%i",clave);
+		write(sock,pass,5);
+		n=read(sock,recvline,MAXLINE);
+		if(strcmp(recvline,"leido")==0)
+		{
+			printf("AUTENTIFICANDO \n");
+		}
+		else
+		{
+			printf("ERROR DE autentificacion \n");
+			exit(-1);
+		}
+		write(sock,sendline,strlen(sendline));
+		n=read(sock,recvline,MAXLINE);
 		if(n==0)
 		{
 			printf("servidor desconectado\n");
@@ -213,12 +236,10 @@ char ** str_split(char * a_str,const char a_delim)
 		{
 			fwrite(recvline,1,strlen(recvline),f2);
 			memset(recvline,0,strlen(recvline));
-			
 			n=read(sock,recvline,MAXLINE);
-
 		}
-		fwrite(recvline,1,strlen(recvline),f2);
 
+		fwrite(recvline,1,strlen(recvline),f2);
 		memset(recvline,0,MAXLINE);
 		fclose(f2);
 		printf("completado ..\n");
@@ -272,11 +293,10 @@ int main (int argc, char **argv)
 
   	printf ("Escriba el usuario ");
   	scanf("%s",(in.usuario)); 
-
+  	strcpy(usuario,in.usuario);
   	printf ("Escriba la contraseña ");
   	scanf("%s",(in.pass));     
   	printf ("tu usuario es : %s y la contraseña es %s \n",(in.usuario),(in.pass));
-
 
 	if((tok=login_1(&in,cl))==NULL)
 	{
@@ -288,10 +308,12 @@ int main (int argc, char **argv)
 		printf("usuario o contraseña invalido\n");
 		exit(1);
 	}
+
 	else
 	{
 		printf("bienvenido amigo \n");
 	}
+	clave=tok->rta;
 		printf("el token es %d\n",tok->rta);
 		int opc=0;
 		while(opc==0){
