@@ -119,37 +119,28 @@ servicio (int sock)
 	char leeido[100];
 	FILE *f3;
 	f3=fopen(usuario,"r");
-	if(f3!=NULL){strcpy(leeido,"leido");}
-	else{strcpy(leeido,"no leido");}
-	write(sock,&leeido,MAXLINE);
+	if(f3!=NULL){strcpy(leeido,"leido");
+			write(sock,&leeido,MAXLINE);
 	
 	if((n = read (sock, line , MAXLINE))<=0)
 		{
 			return;
 		}
-	strcpy(token,line);
-	leido=fread(lectura,1,1000,f3);
-	if(strcmp(lectura,token)==0){
+		strcpy(token,line);
+		leido=fread(lectura,1,1000,f3);
+		if(strcmp(lectura,token)==0){
 		strcpy(leeido,"leido");
-	}
-	else
-	{
-		strcpy(leeido,"no leido");
-	}
-
-		close(f3);
-
-	write(sock,&leeido,MAXLINE);
+			write(sock,&leeido,MAXLINE);
 		if((n = read (sock, line , MAXLINE))<=0)
 		{
 			return;
 		}
 
-	f1=fopen(line,"r");
-	f2=fopen("segundo.txt","w");
-	if(f1!=NULL){
-	for(;;)
-	{
+		f1=fopen(line,"r");
+		f2=fopen("segundo.txt","w");
+		if(f1!=NULL){
+		for(;;)
+		{
 		
 		printf("%s",line);
 		leido=fread (lectura,1,1000,f1);
@@ -175,4 +166,17 @@ else{
 }
 	fclose(f1);
 	fclose(f2);
+
+
+		}
+		else
+		{
+			strcpy(leeido,"no leido");
+		}
+
+		fclose(f3);
+	
+	}
+	else{strcpy(leeido,"no leido");}
+	fclose(f3);
 }
