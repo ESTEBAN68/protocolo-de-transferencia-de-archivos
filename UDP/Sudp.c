@@ -19,6 +19,8 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen);
 char ** str_split(char * a_str,const char a_delim);
 /*se valida que el cliente este logeado*/
 int CompClient(char *nombre,char *token);
+/*funcion para abrir el directorio y contar los archivos*/
+char *Directorios(char *peticion);
 
 
 int main (int argc, char **argv)
@@ -37,6 +39,14 @@ int main (int argc, char **argv)
 	serveraddr.sin_port = htons(SERV_PORT);
 	bind(sockd,(struct sockaddr *)&serveraddr,sizeof(serveraddr));
 	dg_echo(sockd,(struct sockaddr *)&cliaddr,sizeof(cliaddr));
+
+}
+
+char *Directorios(char *peticion)
+{
+	DIR *dir;
+	/* en *ent habrá información sobre el archivo que se está "sacando" a cada momento */
+	struct dirent *ent;
 
 }
 
