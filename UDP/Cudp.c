@@ -89,5 +89,5 @@ void dg_cli(FILE *fp, int sockfd, struct sockaddr *pservaddr, long servlen,char 
   sendto(sockfd,sendline,strlen(sendline),0,pservaddr,servlen);
   /*Recibimos una respuesta de servidor*/
   recvfrom(sockfd,recvline,MAXLINE,0,NULL,NULL);
-  printf("Servidor : %s\n",recvline);
+  printf("\n%s\n",recvline);
 }

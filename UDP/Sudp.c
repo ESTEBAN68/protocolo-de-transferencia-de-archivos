@@ -56,6 +56,9 @@ char *Listar()
 	/*Debido a que retornamos una variable local debemos asignar un espacio en memoria para que la misma se mantenga fuera de este metodo*/
 	char *informacion = (char *)malloc(sizeof(char *)*256);
 	memset(informacion,0,256);
+	int pos=0;
+	char posc[256];
+	memset(posc,0,256);
 	/* Empezaremos a leer en el directorio actual */
     dir = opendir (".");
     /* Miramos que no haya error */
@@ -71,7 +74,11 @@ char *Listar()
       /* Nos devolverá el directorio actual (.) y el anterior (..), como hace ls */
         if ( (strcmp(ent->d_name, ".")!=0) && (strcmp(ent->d_name, "..")!=0) )
     	{
+    		pos++;
+    		sprintf(posc,"%i) ",pos);
       		/* Leemos cada archivo y lo concatenamos en la informacion a retornar */
+      		strcat(informacion,"@ ");
+      		strcat(informacion,posc);
       		strcat(informacion,ent->d_name);
       		strcat(informacion,"\n");
     	}
@@ -131,7 +138,10 @@ char *Tamanio(char *archivo)
 	memset(tam,0,256);
  	char *envio = (char *)malloc(sizeof(char *)*256);
  	memset(envio,0,256);
-  	strcpy(envio,archivo);
+ 	strcpy(envio,"        Informacion del archivo   \n");
+ 	strcat(envio,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@\n");
+ 	strcat(envio,"@ Archivo: ");
+  	strcat(envio,archivo);
 
   fich=fopen(archivo, "r");
   if (fich)
@@ -141,10 +151,11 @@ char *Tamanio(char *archivo)
       fclose(fich);
       /* Si todo va bien, ingresamos el tamanio */
       sprintf(tam,"%i",ftam);
-      strcat(envio," ");
+      strcat(envio,"\n@");
+      strcat(envio," Tamanio: ");
       strcat(envio,tam);
-      strcat(envio," bytes  ");
-      printf("envio: %s\n",envio);
+      strcat(envio," bytes ");
+      strcat(envio,"\n@");
     }else
     {
       strcat(envio," **** bytes ");
@@ -155,7 +166,7 @@ char *Info(char *peticion)
 {
 	DIR *dir;
 	struct dirent *ent;
-	char *informacion = (char *)malloc(sizeof(char *)*256);
+	char *informacion = (char *)malloc(sizeof(char *)*500);
 	memset(informacion,0,256);
     dir = opendir (".");
     if (dir == NULL)
@@ -182,8 +193,13 @@ char *Info(char *peticion)
   	strcat(path,peticion);
   	struct stat st;
     if( stat(path, &st) != 0 )
-    {
+    {	
+    	strcat(informacion," Hora ultimo cambio: ");
         strcat(informacion,ctime(&st.st_ctime));
+        strcat(informacion,"@");
+        strcat(informacion," Hora ultimo acceso: ");
+        strcat(informacion,ctime(&st.st_atime));
+        strcat(informacion,"@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
   	return informacion;
 }
@@ -196,8 +212,8 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 	char msg[MAXLINE];
 	memset(msg,0,MAXLINE);
 
-	char res[256];
-	memset(res,0,256);
+	char res[500];
+	memset(res,0,500);
 	/*Datos que vamos a almacenar del cliente */
 	char **vectorDatos;
 	char nombre[256];
@@ -213,7 +229,6 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 		len = clilen;
 		/*Recibimos la informacion del cliente*/
 		n = recvfrom(sockfd,msg,MAXLINE,0,pcliaddr,&len);
-		printf ("Cliente: %s \n",msg);
 		/*Aplicamos un split para obtener los datos apartados*/
 		vectorDatos = str_split(msg,',');
 		/*guardamos los datos por aparte*/
@@ -221,18 +236,21 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 		strcpy(token,vectorDatos[1]);
 		strcpy(peticion,vectorDatos[2]);
 
-	    
-	    printf("Split nom: %s, tok: %s, pet: %s\n",nombre,token,peticion);
 	    if(CompClient(nombre,token) == 0)
 	    {
 	    	if(strcmp(peticion,"Listar") == 0)
 	    	{
-	    		strcpy(res,Listar());
-	    		printf("Listar: %s\n",res);
+	    		strcpy(res,"      Lista    \n");
+	    		strcat(res,"@@@@@@@@@@@@@@@@@@@@@\n");
+	    		strcat(res,"@\n");
+	    		strcat(res,Listar());
+	    		strcat(res,"@\n");
+	    		strcat(res,"@@@@@@@@@@@@@@@@@@@@@");
 	    		sendto(sockfd,res,strlen(res),0,pcliaddr,len);
 	    	}else
 	    	{
 	    		strcpy(res,Info(peticion));
+	    		sendto(sockfd,res,strlen(res),0,pcliaddr,len);
 	    	}	
 	    }else{
 
