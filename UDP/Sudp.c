@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <time.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +22,11 @@ char ** str_split(char * a_str,const char a_delim);
 /*se valida que el cliente este logeado*/
 int CompClient(char *nombre,char *token);
 /*funcion para abrir el directorio y contar los archivos*/
-char *Directorios(char *peticion);
+char *Listar();
+/*funcion que me retorna los detalles de un archivo*/
+char *Info(char *peticion);
+/*funcion que saca el tamanio del archivo*/
+char *Tamanio(char *archivo);
 
 
 int main (int argc, char **argv)
@@ -42,12 +48,37 @@ int main (int argc, char **argv)
 
 }
 
-char *Directorios(char *peticion)
-{
+char *Listar()
+{	
 	DIR *dir;
 	/* en *ent habrá información sobre el archivo que se está "sacando" a cada momento */
 	struct dirent *ent;
+	/*Debido a que retornamos una variable local debemos asignar un espacio en memoria para que la misma se mantenga fuera de este metodo*/
+	char *informacion = (char *)malloc(sizeof(char *)*256);
+	memset(informacion,0,256);
+	/* Empezaremos a leer en el directorio actual */
+    dir = opendir (".");
+    /* Miramos que no haya error */
+    if (dir == NULL)
+    {
+    	perror("No puedo abrir el directorio.\n");
+    	exit(0);	
+    }
+    /* Una vez nos aseguramos de que no hay error*/
+    /* Leyendo uno a uno todos los archivos que hay */
+    while ((ent = readdir (dir)) != NULL)
+    {
+      /* Nos devolverá el directorio actual (.) y el anterior (..), como hace ls */
+        if ( (strcmp(ent->d_name, ".")!=0) && (strcmp(ent->d_name, "..")!=0) )
+    	{
+      		/* Leemos cada archivo y lo concatenamos en la informacion a retornar */
+      		strcat(informacion,ent->d_name);
+      		strcat(informacion,"\n");
+    	}
+    }
 
+  	closedir (dir);
+  	return informacion;
 }
 
 int CompClient(char *nombre,char *token)
@@ -92,6 +123,70 @@ char ** str_split(char * a_str,const char a_delim)
 	}
 	return result;
 }
+char *Tamanio(char *archivo)
+{
+	FILE *fich;
+	int ftam;
+	char tam[256];
+	memset(tam,0,256);
+ 	char *envio = (char *)malloc(sizeof(char *)*256);
+ 	memset(envio,0,256);
+  	strcpy(envio,archivo);
+
+  fich=fopen(archivo, "r");
+  if (fich)
+    {
+      fseek(fich, 0, SEEK_END);
+      ftam=ftell(fich);
+      fclose(fich);
+      /* Si todo va bien, ingresamos el tamanio */
+      sprintf(tam,"%i",ftam);
+      strcat(envio," ");
+      strcat(envio,tam);
+      strcat(envio," bytes  ");
+      printf("envio: %s\n",envio);
+    }else
+    {
+      strcat(envio," **** bytes ");
+    }
+    return envio;
+}
+char *Info(char *peticion)
+{
+	DIR *dir;
+	struct dirent *ent;
+	char *informacion = (char *)malloc(sizeof(char *)*256);
+	memset(informacion,0,256);
+    dir = opendir (".");
+    if (dir == NULL)
+    {
+    	perror("No puedo abrir el directorio.\n");
+    	exit(0);	
+    }
+    while ((ent = readdir (dir)) != NULL)
+    {
+	    if(strcmp(peticion,ent->d_name)==0)
+	    {
+	    	if ( (strcmp(ent->d_name, ".")!=0) && (strcmp(ent->d_name, "..")!=0) )
+	    	{
+	      		/* Leemos cada archivo y lo concatenamos en la informacion a retornar */
+	      		strcpy(informacion,Tamanio(ent->d_name));
+	    	}
+	    }      
+    }
+  	closedir (dir);
+
+  	char path[256];
+  	memset(path,0,256);
+  	strcpy(path,"/");
+  	strcat(path,peticion);
+  	struct stat st;
+    if( stat(path, &st) != 0 )
+    {
+        strcat(informacion,ctime(&st.st_ctime));
+    }
+  	return informacion;
+}
 
 void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 {	
@@ -103,7 +198,6 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 
 	char res[256];
 	memset(res,0,256);
-	strcpy(res,"recibido");//prueba quitar
 	/*Datos que vamos a almacenar del cliente */
 	char **vectorDatos;
 	char nombre[256];
@@ -131,7 +225,15 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 	    printf("Split nom: %s, tok: %s, pet: %s\n",nombre,token,peticion);
 	    if(CompClient(nombre,token) == 0)
 	    {
-	    	sendto(sockfd,res,strlen(res),0,pcliaddr,len);	
+	    	if(strcmp(peticion,"Listar") == 0)
+	    	{
+	    		strcpy(res,Listar());
+	    		printf("Listar: %s\n",res);
+	    		sendto(sockfd,res,strlen(res),0,pcliaddr,len);
+	    	}else
+	    	{
+	    		strcpy(res,Info(peticion));
+	    	}	
 	    }else{
 
 	    	printf("usuario no se encuentra logeado.\n");
