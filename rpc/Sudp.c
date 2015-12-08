@@ -193,13 +193,17 @@ char *Info(char *peticion)
   	if (h==1){
   	char path[256];
   	memset(path,0,256);
-  	strcpy(path,"/");
-  	strcat(path,peticion);
+  	strcpy(path,peticion);
+  	//strcat(path,peticion);
+  	printf("path: %s\n",path);
   	struct stat st;
-    	if( stat(path, &st) != 0 )
+    	if( stat(path, &st) == -1 )
     	{	
-	    	strcat(informacion," Hora ultimo cambio: ");
-	        strcat(informacion,ctime(&st.st_ctime));
+    		strcat(informacion," Error leyendo el archivo especifico.");
+    	}else
+    	{
+			strcat(informacion," Hora ultimo cambio: ");
+	        strcat(informacion,ctime(&st.st_mtime));
 	        strcat(informacion,"@");
 	        strcat(informacion," Hora ultimo acceso: ");
 	        strcat(informacion,ctime(&st.st_atime));
