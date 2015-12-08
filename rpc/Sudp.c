@@ -176,6 +176,7 @@ char *Info(char *peticion)
     	perror("No puedo abrir el directorio.\n");
     	exit(0);	
     }
+    int h=0;
     while ((ent = readdir (dir)) != NULL)
     {
 	    if(strcmp(peticion,ent->d_name)==0)
@@ -185,24 +186,31 @@ char *Info(char *peticion)
 	      		/* Leemos cada archivo y lo concatenamos en la informacion a retornar */
 	      		strcpy(informacion,Tamanio(ent->d_name));
 	    	}
+	    	h=1;
 	    }      
     }
   	closedir (dir);
-
+  	if (h==1){
   	char path[256];
   	memset(path,0,256);
   	strcpy(path,"/");
   	strcat(path,peticion);
   	struct stat st;
-    if( stat(path, &st) != 0 )
-    {	
-    	strcat(informacion," Hora ultimo cambio: ");
-        strcat(informacion,ctime(&st.st_ctime));
-        strcat(informacion,"@");
-        strcat(informacion," Hora ultimo acceso: ");
-        strcat(informacion,ctime(&st.st_atime));
-        strcat(informacion,"@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-    }
+    	if( stat(path, &st) != 0 )
+    	{	
+	    	strcat(informacion," Hora ultimo cambio: ");
+	        strcat(informacion,ctime(&st.st_ctime));
+	        strcat(informacion,"@");
+	        strcat(informacion," Hora ultimo acceso: ");
+	        strcat(informacion,ctime(&st.st_atime));
+	        strcat(informacion,"@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    	}
+	}
+	else
+	{
+		strcpy(informacion,"el archivo no existe");
+	}
+	memset(peticion,0,strlen(peticion));
   	return informacion;
 }
 
@@ -225,13 +233,16 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 	char peticion[256];
 	memset(peticion,0,256);
 
-	printf("A la espera de un cliente.\n");
+	printf("A la espera de un cliente......................\n");
 	for(;;)
 	{
 		len = clilen;
 		/*Recibimos la informacion del cliente*/
+		memset(msg,0,256);
 		n = recvfrom(sockfd,msg,MAXLINE,0,pcliaddr,&len);
 		/*Aplicamos un split para obtener los datos apartados*/
+		/*limpiando vector de datos*/
+
 		vectorDatos = str_split(msg,',');
 		/*guardamos los datos por aparte*/
 		strcpy(nombre,vectorDatos[0]);
@@ -241,13 +252,19 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 		f3=fopen(nombre,"r");
 		if(f3!=NULL)
 		{
-		char *lectura[1000];
+		char lectura[1000];
+		memset(lectura,0,1000);
 		fread(lectura,1,1000,f3);
+		printf("leyo: %s \n",lectura );
 			if(strcmp(lectura,token)==0)
 			{
+				memset(peticion,0,256);
 				strcpy(peticion,vectorDatos[2]);
+				printf("peticion: %s\n",peticion );
+				printf("vectorDatos: %s\n",vectorDatos[2]);
 				if(strcmp(peticion,"Listar") == 0)
 		    	{
+		    		memset(res,0,500);
 		    		strcpy(res,"      Lista    \n");
 		    		strcat(res,"@@@@@@@@@@@@@@@@@@@@@\n");
 		    		strcat(res,"@\n");
@@ -255,17 +272,23 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 		    		strcat(res,"@\n");
 		    		strcat(res,"@@@@@@@@@@@@@@@@@@@@@");
 		    		sendto(sockfd,res,strlen(res),0,pcliaddr,len);
+		    		memset(peticion,0,256);
+		    		memset(res,0,500);
 	    		}
 	    		else
 	    		{
+	    			printf("%s  - \n",peticion);
 		    		strcpy(res,Info(peticion));
+		    		memset(peticion,0,256);
 		    		sendto(sockfd,res,strlen(res),0,pcliaddr,len);
+		    		memset(res,0,500);
 	    		}	
+	    		memset(peticion,0,256);
 
 			}
 			else
 			{
-				strcpy(res,"   Error en la autentificacion");
+				strcpy(res,"   Error en la autentificacion token ");
 				sendto(sockfd,res,strlen(res),0,pcliaddr,len);
 
 			}
@@ -273,7 +296,7 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 		}
 		else
 		{
-			strcpy(res,"   Error en la autentificacion");
+			strcpy(res,"   Error en la autentificacion usuario");
 			sendto(sockfd,res,strlen(res),0,pcliaddr,len);
 		}
 

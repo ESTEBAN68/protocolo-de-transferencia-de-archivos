@@ -67,7 +67,7 @@ int main(int argc,char **argv)
 	{error("Error creando el socket.");}
 	/*Hacemos uso del socket para enviar la informacion al servidor*/
 	dg_cli(stdin,sockfd,(struct sockaddr *)&serveraddr,sizeof(serveraddr),informacion);
-
+	memset(peticion,0,256);
 	return EXIT_SUCCESS;
 
 }

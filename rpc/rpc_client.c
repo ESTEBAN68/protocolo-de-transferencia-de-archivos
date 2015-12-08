@@ -204,6 +204,7 @@ void 	dg_cli(FILE *fp, int sockfd, struct sockaddr *pservaddr, long servlen,char
 	{error("Error creando el socket.");}
 	/*Hacemos uso del socket para enviar la informacion al servidor*/
 	dg_cli(stdin,sockfd,(struct sockaddr *)&serveraddr,sizeof(serveraddr),informacion);
+	memset(informacion,0,256);
 
  	}
  	void infor(char* name)
@@ -228,6 +229,7 @@ void 	dg_cli(FILE *fp, int sockfd, struct sockaddr *pservaddr, long servlen,char
 	{error("Error creando el socket.");}
 	/*Hacemos uso del socket para enviar la informacion al servidor*/
 	dg_cli(stdin,sockfd,(struct sockaddr *)&serveraddr,sizeof(serveraddr),informacion);
+	memset(informacion,0,256);
 
  	}
 
