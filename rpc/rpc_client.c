@@ -279,7 +279,7 @@ void 	dg_cli(FILE *fp, int sockfd, struct sockaddr *pservaddr, long servlen,char
 			}
 			else
 			{
-				printf("error de autentificacion ...\n");
+				printf("error de autentificacion usuario...\n");
 				exit(-1);
 			}
 			char pass[256];
@@ -293,6 +293,7 @@ void 	dg_cli(FILE *fp, int sockfd, struct sockaddr *pservaddr, long servlen,char
 			else
 			{
 				printf("ERROR: autentificacion \n");
+				printf("recibio: %s\n",recvline );
 				exit(-1);
 			}
 			write(sock,sendline,strlen(sendline));
@@ -392,7 +393,7 @@ void 	dg_cli(FILE *fp, int sockfd, struct sockaddr *pservaddr, long servlen,char
 		in2.token=tok->rta;
 		if((tok2=logout_1(&in2,cl))==NULL)
 		{
-			printf("\nerror :%s",clnt_sperror(cl,argv[1]));
+			printf("error :%s\n",clnt_sperror(cl,argv[1]));
 			exit(-1);
 		}
 		printf("hasta pronto ... \n");
