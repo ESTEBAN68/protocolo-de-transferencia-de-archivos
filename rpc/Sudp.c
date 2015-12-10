@@ -237,7 +237,7 @@ void dg_echo(int sockfd, struct sockaddr *pcliaddr, long clilen)
 	char peticion[256];
 	memset(peticion,0,256);
 
-	printf("A la espera de un cliente....\n");
+	printf("A la espera de un cliente......................\n");
 	for(;;)
 	{
 		len = clilen;
